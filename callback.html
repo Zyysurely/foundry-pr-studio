@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Connecting GitHub · Foundry PR Studio</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body data-page="callback" class="callback-page">
+  <main class="callback-shell">
+    <section class="panel callback-panel">
+      <div id="callback-spinner" class="spinner" aria-hidden="true"></div>
+      <p id="callback-eyebrow" class="eyebrow">GitHub redirect received</p>
+      <h1 id="callback-title">Completing your connection…</h1>
+      <p id="callback-message">Validating the secure state and resolving your installation.</p>
+
+      <ol class="callback-progress">
+        <li id="oauth-stage"><span>1</span><p><strong>User authorized</strong><small>Exchange OAuth code</small></p></li>
+        <li id="install-stage"><span>2</span><p><strong>Installation resolved</strong><small>Reuse existing or install</small></p></li>
+        <li id="complete-stage"><span>3</span><p><strong>Main page updated</strong><small>Close this popup</small></p></li>
+      </ol>
+
+      <div id="installation-picker" class="installation-picker" hidden>
+        <strong>Choose an installation</strong>
+        <div id="installation-options"></div>
+      </div>
+
+      <div id="callback-error" class="error-box" hidden></div>
+      <button id="close-callback" class="button button-primary" type="button" hidden>Close this window</button>
+    </section>
+  </main>
+</body>
+</html>

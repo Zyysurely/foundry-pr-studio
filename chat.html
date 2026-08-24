@@ -3,128 +3,95 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta
-    name="description"
-    content="Generate random GitHub pull request and issue test templates without storing credentials."
-  >
+  <meta name="description" content="Create a real pull request or issue through a connected GitHub App.">
   <title>Creation Tests · Foundry PR Studio</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%236254e7'/%3E%3Cpath d='M18 18h12v28H18zm16 0h12v28H34z' fill='white'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
   <script src="app.js" defer></script>
 </head>
-<body data-page="tests">
+<body data-page="tests" class="app-page">
   <header class="site-header">
     <a class="brand" href="index.html" aria-label="Foundry PR Studio home">
-      <span class="brand-mark" aria-hidden="true">
-        <span class="brand-mark-github">GH</span>
-        <span class="brand-mark-link">+</span>
-        <span class="brand-mark-foundry">AI</span>
-      </span>
-      <span>
-        <strong>Foundry PR Studio</strong>
-        <small>Creation tests</small>
-      </span>
+      <span class="brand-mark" aria-hidden="true"><b>GH</b><i>+</i><b>AI</b></span>
+      <span><strong>Foundry PR Studio</strong><small>Real GitHub tests</small></span>
     </a>
-    <a class="button button-ghost button-small" href="index.html">Back</a>
+    <div class="header-actions">
+      <span class="status-pill status-success"><span class="status-dot"></span>Connected</span>
+      <button id="reset-connection" class="button button-ghost button-small" type="button">Reset</button>
+    </div>
   </header>
 
-  <main class="tests-shell">
-    <aside class="tests-sidebar">
-      <p class="eyebrow">Target</p>
-      <h1>GitHub repository</h1>
-      <p>Both actions use the repository below. No token is requested or stored.</p>
+  <main class="workspace">
+    <aside class="workspace-sidebar">
+      <p class="sidebar-label">Workspace</p>
+      <h1>GitHub tests</h1>
+      <p class="sidebar-copy">Create real resources with random templates.</p>
 
-      <label>
-        <span class="field-label">Repository</span>
-        <input
-          id="repository-input"
-          type="text"
-          value="Zyysurely/foundry-pr-studio"
-          placeholder="owner/repository"
-          spellcheck="false"
-          autocomplete="off"
-        >
-      </label>
+      <section class="summary-card">
+        <div><span class="github-icon small">GH</span><p><small>GitHub account</small><strong id="summary-account">—</strong></p></div>
+        <dl>
+          <div><dt>Installation</dt><dd id="summary-installation">—</dd></div>
+          <div><dt>Authorization</dt><dd id="summary-auth">—</dd></div>
+        </dl>
+      </section>
 
-      <label>
-        <span class="field-label">Default branch</span>
-        <input
-          id="branch-input"
-          type="text"
-          value="main"
-          placeholder="main"
-          spellcheck="false"
-          autocomplete="off"
-        >
-      </label>
+      <section class="summary-card">
+        <div><span class="foundry-icon small">AI</span><p><small>Foundry project</small><strong id="summary-project">—</strong></p></div>
+        <dl><div><dt>Connection</dt><dd id="summary-connection">—</dd></div></dl>
+      </section>
 
-      <div class="project-summary">
-        <span class="project-icon" aria-hidden="true">AI</span>
-        <div>
-          <small>Foundry project</small>
-          <strong id="project-summary-name">—</strong>
-        </div>
-      </div>
-
-      <div class="sidebar-note">
-        <strong>GitHub Pages limitation</strong>
-        <p>
-          A static page cannot securely create resources through an App token. These buttons open
-          GitHub’s authenticated web UI with generated content.
-        </p>
-      </div>
+      <div class="sidebar-security"><span>✓</span><p><strong>Backend-only tokens</strong><small>Secrets and GitHub tokens never enter browser storage.</small></p></div>
     </aside>
 
     <section class="tests-content">
-      <div class="tests-intro">
-        <p class="eyebrow">Two explicit actions</p>
-        <h2>Choose a creation test.</h2>
-        <p>Each click generates a different template. You make the final submission on GitHub.</p>
+      <div id="missing-session" class="empty-state" hidden>
+        <span>!</span><h2>GitHub connection expired</h2>
+        <p>Return to setup and reconnect the GitHub App.</p>
+        <a class="button button-primary" href="index.html">Return to setup</a>
       </div>
 
-      <div id="form-error" class="form-error" role="alert" hidden></div>
+      <div id="tests-experience">
+        <header class="tests-heading">
+          <p class="eyebrow">Live GitHub operations</p>
+          <h2>Choose a repository and run a test.</h2>
+          <p>Each button creates a real GitHub resource using a randomly selected template.</p>
+        </header>
 
-      <div class="test-grid">
-        <article class="test-card">
-          <div class="test-icon test-icon-pr" aria-hidden="true">PR</div>
-          <p class="eyebrow">Pull request test</p>
-          <h3>Create a generated file</h3>
-          <p>
-            Copies random Markdown to your clipboard and opens GitHub’s new-file editor. Paste the
-            content, choose a new branch, and GitHub will guide you to open the pull request.
-          </p>
-          <button id="test-pr" class="button button-primary button-full" type="button">
-            Test PR creation
-            <span aria-hidden="true">↗</span>
-          </button>
-        </article>
+        <section class="repository-picker">
+          <label>
+            <span>Target repository</span>
+            <select id="repository-select" disabled><option>Loading repositories…</option></select>
+          </label>
+          <a id="repository-link" class="text-link" href="#" target="_blank" rel="noreferrer" hidden>Open repository ↗</a>
+        </section>
 
-        <article class="test-card">
-          <div class="test-icon test-icon-issue" aria-hidden="true">#</div>
-          <p class="eyebrow">Issue test</p>
-          <h3>Open a prefilled issue</h3>
-          <p>
-            Opens GitHub’s new-issue form with a random title and body. Review the generated
-            content and click <strong>Submit new issue</strong> on GitHub.
-          </p>
-          <button id="test-issue" class="button button-primary button-full" type="button">
-            Test issue creation
-            <span aria-hidden="true">↗</span>
-          </button>
-        </article>
+        <div id="action-error" class="error-box" role="alert" hidden></div>
+
+        <section class="action-grid">
+          <article class="action-card">
+            <div class="action-icon pr-icon">PR</div>
+            <p class="eyebrow">Branch + commit + pull request</p>
+            <h3>Test PR creation</h3>
+            <p>Creates a unique branch, commits generated Markdown, and opens a PR against the default branch.</p>
+            <button id="create-pr" class="button button-primary button-full" type="button" disabled>Create real test PR</button>
+          </article>
+          <article class="action-card">
+            <div class="action-icon issue-icon">#</div>
+            <p class="eyebrow">GitHub issue</p>
+            <h3>Test issue creation</h3>
+            <p>Creates a real issue with a random title, body, and generated test metadata.</p>
+            <button id="create-issue" class="button button-primary button-full" type="button" disabled>Create real test issue</button>
+          </article>
+        </section>
+
+        <section id="action-result" class="result-card" hidden>
+          <span>✓</span>
+          <div><p id="result-type" class="eyebrow"></p><h3 id="result-title"></h3><small id="result-meta"></small></div>
+          <a id="result-link" class="button button-primary" href="#" target="_blank" rel="noreferrer">Open on GitHub ↗</a>
+        </section>
+
+        <p class="danger-note"><strong>Real action:</strong> nothing is created until you click one of the two buttons.</p>
       </div>
-
-      <section id="result-card" class="result-card" hidden>
-        <span class="result-check" aria-hidden="true">✓</span>
-        <div>
-          <p id="result-eyebrow" class="eyebrow">Template ready</p>
-          <h3 id="result-title"></h3>
-          <p id="result-description"></p>
-        </div>
-        <button id="copy-again" class="button button-secondary button-small" type="button" hidden>
-          Copy again
-        </button>
-      </section>
     </section>
   </main>
 
