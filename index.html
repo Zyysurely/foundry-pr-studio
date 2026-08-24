@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta
+    name="description"
+    content="A static GitHub Pages demo for installing a GitHub App and testing PR or issue creation."
+  >
+  <title>Foundry PR Studio</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%236254e7'/%3E%3Cpath d='M18 18h12v28H18zm16 0h12v28H34z' fill='white'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body data-page="home">
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Foundry PR Studio home">
+      <span class="brand-mark" aria-hidden="true">
+        <span class="brand-mark-github">GH</span>
+        <span class="brand-mark-link">+</span>
+        <span class="brand-mark-foundry">AI</span>
+      </span>
+      <span>
+        <strong>Foundry PR Studio</strong>
+        <small>GitHub Pages edition</small>
+      </span>
+    </a>
+    <span class="status-pill">
+      <span class="status-dot"></span>
+      Static · no secrets
+    </span>
+  </header>
+
+  <main class="home-shell">
+    <section class="hero">
+      <p class="eyebrow">GitHub App workflow demo</p>
+      <h1>Connect on GitHub.<br>Test with two clicks.</h1>
+      <p class="hero-copy">
+        This public page contains no private key, client secret, access token, backend, or
+        machine-specific dependency. GitHub handles sign-in and final confirmation.
+      </p>
+    </section>
+
+    <section class="home-grid">
+      <article class="panel app-card">
+        <div class="card-heading">
+          <span class="card-number">01</span>
+          <div>
+            <p class="eyebrow">Optional setup</p>
+            <h2>Open the GitHub App</h2>
+          </div>
+        </div>
+
+        <div class="app-identity">
+          <div class="github-avatar" aria-hidden="true">GH</div>
+          <div>
+            <h3>zyying-public-app</h3>
+            <p>Install or configure repository access directly on GitHub.</p>
+          </div>
+        </div>
+
+        <ul class="permission-list">
+          <li><span>Contents</span><strong>Read &amp; write</strong></li>
+          <li><span>Pull requests</span><strong>Read &amp; write</strong></li>
+          <li><span>Issues</span><strong>Read &amp; write</strong></li>
+        </ul>
+
+        <button id="open-github-app" class="button button-dark button-full" type="button">
+          Open GitHub App
+          <span aria-hidden="true">↗</span>
+        </button>
+
+        <div id="popup-controls" class="popup-controls" hidden>
+          <span>GitHub is open in a separate window.</span>
+          <button id="close-popup" class="button button-ghost button-small" type="button">
+            Close window
+          </button>
+        </div>
+      </article>
+
+      <article class="panel launch-card">
+        <div class="card-heading">
+          <span class="card-number">02</span>
+          <div>
+            <p class="eyebrow">Generated workspace</p>
+            <h2>Continue to the test page</h2>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <span class="project-icon" aria-hidden="true">AI</span>
+          <div>
+            <small>Random Foundry project</small>
+            <strong id="generated-project-name">Generating…</strong>
+          </div>
+          <span class="random-badge">Random</span>
+        </div>
+
+        <div class="static-boundary">
+          <span class="security-check" aria-hidden="true">✓</span>
+          <div>
+            <strong>Safe for GitHub Pages</strong>
+            <p>
+              The test buttons open GitHub’s own web forms. Your browser session performs the
+              action only after you review and confirm it on GitHub.
+            </p>
+          </div>
+        </div>
+
+        <a class="button button-primary button-full" href="chat.html">
+          Open creation tests
+          <span aria-hidden="true">→</span>
+        </a>
+      </article>
+    </section>
+
+    <section class="flow-strip" aria-label="How the static workflow works">
+      <div><span>1</span><p><strong>Enter repository</strong><small>owner/repository</small></p></div>
+      <div><span>2</span><p><strong>Generate template</strong><small>Random PR or issue content</small></p></div>
+      <div><span>3</span><p><strong>Confirm on GitHub</strong><small>No credentials touch this page</small></p></div>
+    </section>
+  </main>
+</body>
+</html>

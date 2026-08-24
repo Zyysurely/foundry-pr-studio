@@ -1,0 +1,358 @@
+"use strict";
+
+const STORAGE_KEYS = Object.freeze({
+  project: "foundry-pr-studio.project.v1",
+  repository: "foundry-pr-studio.repository.v1",
+  branch: "foundry-pr-studio.branch.v1",
+});
+
+const GITHUB_APP_URL = "https://github.com/apps/zyying-public-app";
+
+const PROJECT_WORDS = Object.freeze([
+  "aurora",
+  "cobalt",
+  "ember",
+  "harbor",
+  "lumen",
+  "nova",
+  "orbit",
+  "quartz",
+]);
+
+const PULL_REQUEST_TEMPLATES = Object.freeze([
+  {
+    title: "Add a Foundry integration smoke-test note",
+    heading: "Foundry integration smoke test",
+    description:
+      "This generated note validates the repository contribution flow from Foundry PR Studio.",
+  },
+  {
+    title: "Document the GitHub App connection test",
+    heading: "GitHub App connection test",
+    description:
+      "This random template documents a browser-driven GitHub App integration test.",
+  },
+  {
+    title: "Add a repository automation sample",
+    heading: "Repository automation sample",
+    description:
+      "This sample demonstrates a credential-free GitHub Pages workflow that finishes on GitHub.",
+  },
+]);
+
+const ISSUE_TEMPLATES = Object.freeze([
+  {
+    title: "Validate GitHub App repository automation",
+    body:
+      "Confirm the expected repository automation behavior and record any permission or setup problems.",
+  },
+  {
+    title: "Review Foundry PR Studio integration settings",
+    body:
+      "Review the GitHub App installation, repository selection, and expected pull request workflow.",
+  },
+  {
+    title: "Track the Foundry GitHub integration smoke test",
+    body:
+      "Use this issue to record the result of a generated Foundry PR Studio integration smoke test.",
+  },
+]);
+
+let lastCopiedTemplate = "";
+
+document.addEventListener("DOMContentLoaded", () => {
+  const page = document.body.dataset.page;
+
+  if (page === "home") {
+    initializeHomePage();
+    return;
+  }
+
+  if (page === "tests") {
+    initializeTestsPage();
+  }
+});
+
+function initializeHomePage() {
+  const projectName = getOrCreateProjectName();
+  const openButton = getRequiredElement("open-github-app");
+  const closeButton = getRequiredElement("close-popup");
+  const popupControls = getRequiredElement("popup-controls");
+  let githubWindow = null;
+  let closeCheckId = 0;
+
+  setText("generated-project-name", projectName);
+
+  openButton.addEventListener("click", () => {
+    githubWindow = openPopup(GITHUB_APP_URL, "github-app");
+
+    if (!githubWindow) {
+      window.open(GITHUB_APP_URL, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    popupControls.hidden = false;
+    githubWindow.focus();
+    window.clearInterval(closeCheckId);
+    closeCheckId = window.setInterval(() => {
+      if (!githubWindow?.closed) {
+        return;
+      }
+
+      window.clearInterval(closeCheckId);
+      popupControls.hidden = true;
+    }, 500);
+  });
+
+  closeButton.addEventListener("click", () => {
+    githubWindow?.close();
+    window.clearInterval(closeCheckId);
+    popupControls.hidden = true;
+  });
+}
+
+function initializeTestsPage() {
+  const repositoryInput = getRequiredElement("repository-input");
+  const branchInput = getRequiredElement("branch-input");
+  const pullRequestButton = getRequiredElement("test-pr");
+  const issueButton = getRequiredElement("test-issue");
+  const copyAgainButton = getRequiredElement("copy-again");
+  const savedRepository = window.localStorage.getItem(STORAGE_KEYS.repository);
+  const savedBranch = window.localStorage.getItem(STORAGE_KEYS.branch);
+
+  if (savedRepository) {
+    repositoryInput.value = savedRepository;
+  }
+
+  if (savedBranch) {
+    branchInput.value = savedBranch;
+  }
+
+  setText("project-summary-name", getOrCreateProjectName());
+
+  repositoryInput.addEventListener("change", saveTarget);
+  branchInput.addEventListener("change", saveTarget);
+  pullRequestButton.addEventListener("click", () => {
+    void handlePullRequestTest();
+  });
+  issueButton.addEventListener("click", handleIssueTest);
+  copyAgainButton.addEventListener("click", () => {
+    void copyText(lastCopiedTemplate);
+  });
+
+  async function handlePullRequestTest() {
+    const target = validateTarget(repositoryInput.value, branchInput.value);
+
+    if (!target.ok) {
+      showFormError(getRequiredElement("form-error"), target.error);
+      return;
+    }
+
+    saveTarget();
+    const template = selectRandom(PULL_REQUEST_TEMPLATES);
+    const testId = createTestId();
+    const fileName = `.github/foundry-pr-studio/demo-${testId}.md`;
+    const content = [
+      `# ${template.heading}`,
+      "",
+      template.description,
+      "",
+      "## Test metadata",
+      "",
+      `- Repository: \`${target.repository}\``,
+      `- Foundry project: \`${getOrCreateProjectName()}\``,
+      `- Test ID: \`${testId}\``,
+      `- Generated at: \`${new Date().toISOString()}\``,
+      "",
+      "> This content was generated by the static Foundry PR Studio GitHub Pages demo.",
+      "",
+    ].join("\n");
+    const copied = await copyText(content);
+    const newFileUrl = new URL(
+      `https://github.com/${target.repository}/new/${encodeURIComponent(target.branch)}`,
+    );
+    newFileUrl.searchParams.set("filename", fileName);
+    lastCopiedTemplate = content;
+    getRequiredElement("form-error").hidden = true;
+    showResult(
+      "PR template ready",
+      template.title,
+      copied
+        ? `The Markdown is on your clipboard. Paste it in GitHub, then choose “Create a new branch for this commit and start a pull request.”`
+        : "Copy the generated Markdown below again, then paste it into GitHub’s editor.",
+      true,
+    );
+    window.open(newFileUrl.href, "_blank", "noopener,noreferrer");
+  }
+
+  function handleIssueTest() {
+    const target = validateTarget(repositoryInput.value, branchInput.value);
+
+    if (!target.ok) {
+      showFormError(getRequiredElement("form-error"), target.error);
+      return;
+    }
+
+    saveTarget();
+    const template = selectRandom(ISSUE_TEMPLATES);
+    const testId = createTestId();
+    const title = `[Foundry PR Studio] ${template.title}`;
+    const body = [
+      template.body,
+      "",
+      "## Generated test metadata",
+      "",
+      `- Repository: \`${target.repository}\``,
+      `- Foundry project: \`${getOrCreateProjectName()}\``,
+      `- Test ID: \`${testId}\``,
+      `- Generated at: \`${new Date().toISOString()}\``,
+      "",
+      "> This issue content was generated by the static Foundry PR Studio GitHub Pages demo.",
+    ].join("\n");
+    const issueUrl = new URL(`https://github.com/${target.repository}/issues/new`);
+    issueUrl.searchParams.set("title", title);
+    issueUrl.searchParams.set("body", body);
+    getRequiredElement("form-error").hidden = true;
+    showResult(
+      "Issue template ready",
+      title,
+      "GitHub opened a prefilled issue. Review it and click “Submit new issue” to create it.",
+      false,
+    );
+    window.open(issueUrl.href, "_blank", "noopener,noreferrer");
+  }
+
+  function saveTarget() {
+    window.localStorage.setItem(STORAGE_KEYS.repository, repositoryInput.value.trim());
+    window.localStorage.setItem(STORAGE_KEYS.branch, branchInput.value.trim());
+  }
+}
+
+function showResult(eyebrow, title, description, allowCopy) {
+  const resultCard = getRequiredElement("result-card");
+  setText("result-eyebrow", eyebrow);
+  setText("result-title", title);
+  setText("result-description", description);
+  getRequiredElement("copy-again").hidden = !allowCopy;
+  resultCard.hidden = false;
+}
+
+function validateTarget(repositoryValue, branchValue) {
+  const repository = repositoryValue.trim();
+  const branch = branchValue.trim();
+
+  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository)) {
+    return {
+      ok: false,
+      error: "Repository must use the owner/repository format.",
+    };
+  }
+
+  if (!branch || !/^[A-Za-z0-9._/-]+$/.test(branch)) {
+    return {
+      ok: false,
+      error: "Enter a valid default branch such as main.",
+    };
+  }
+
+  return { ok: true, repository, branch };
+}
+
+function getOrCreateProjectName() {
+  const cachedProject = window.localStorage.getItem(STORAGE_KEYS.project);
+
+  if (cachedProject) {
+    return cachedProject;
+  }
+
+  const randomValues = new Uint32Array(2);
+  window.crypto.getRandomValues(randomValues);
+  const word = PROJECT_WORDS[randomValues[0] % PROJECT_WORDS.length];
+  const suffix = randomValues[1].toString(36).slice(0, 6).padStart(6, "0");
+  const projectName = `foundry-${word}-${suffix}`;
+  window.localStorage.setItem(STORAGE_KEYS.project, projectName);
+  return projectName;
+}
+
+function selectRandom(values) {
+  const randomValue = new Uint32Array(1);
+  window.crypto.getRandomValues(randomValue);
+  return values[randomValue[0] % values.length];
+}
+
+function createTestId() {
+  const randomValue = new Uint32Array(1);
+  window.crypto.getRandomValues(randomValue);
+  return `${Date.now().toString(36)}-${randomValue[0].toString(36).slice(0, 5)}`;
+}
+
+function openPopup(url, name) {
+  const width = 720;
+  const height = 760;
+  const left = Math.max(0, Math.round(window.screenX + (window.outerWidth - width) / 2));
+  const top = Math.max(0, Math.round(window.screenY + (window.outerHeight - height) / 2));
+  return window.open(
+    url,
+    name,
+    [
+      "popup=yes",
+      `width=${width}`,
+      `height=${height}`,
+      `left=${left}`,
+      `top=${top}`,
+      "resizable=yes",
+      "scrollbars=yes",
+    ].join(","),
+  );
+}
+
+async function copyText(value) {
+  try {
+    await window.navigator.clipboard.writeText(value);
+    showToast("Generated Markdown copied to clipboard.");
+    return true;
+  } catch (error) {
+    if (error instanceof DOMException) {
+      showToast("Clipboard access was blocked. Use “Copy again” after allowing clipboard access.", "error");
+      return false;
+    }
+    throw error;
+  }
+}
+
+function showFormError(element, message) {
+  element.textContent = message;
+  element.hidden = false;
+}
+
+function showToast(message, tone = "default") {
+  const toast = document.getElementById("toast");
+
+  if (!toast) {
+    return;
+  }
+
+  toast.textContent = message;
+  toast.classList.toggle("is-error", tone === "error");
+  toast.hidden = false;
+  window.clearTimeout(showToast.timeoutId);
+  showToast.timeoutId = window.setTimeout(() => {
+    toast.hidden = true;
+  }, 3200);
+}
+
+showToast.timeoutId = 0;
+
+function getRequiredElement(id) {
+  const element = document.getElementById(id);
+
+  if (!element) {
+    throw new Error(`Required element #${id} was not found.`);
+  }
+
+  return element;
+}
+
+function setText(id, value) {
+  getRequiredElement(id).textContent = String(value);
+}

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta
+    name="description"
+    content="Generate random GitHub pull request and issue test templates without storing credentials."
+  >
+  <title>Creation Tests · Foundry PR Studio</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%236254e7'/%3E%3Cpath d='M18 18h12v28H18zm16 0h12v28H34z' fill='white'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body data-page="tests">
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Foundry PR Studio home">
+      <span class="brand-mark" aria-hidden="true">
+        <span class="brand-mark-github">GH</span>
+        <span class="brand-mark-link">+</span>
+        <span class="brand-mark-foundry">AI</span>
+      </span>
+      <span>
+        <strong>Foundry PR Studio</strong>
+        <small>Creation tests</small>
+      </span>
+    </a>
+    <a class="button button-ghost button-small" href="index.html">Back</a>
+  </header>
+
+  <main class="tests-shell">
+    <aside class="tests-sidebar">
+      <p class="eyebrow">Target</p>
+      <h1>GitHub repository</h1>
+      <p>Both actions use the repository below. No token is requested or stored.</p>
+
+      <label>
+        <span class="field-label">Repository</span>
+        <input
+          id="repository-input"
+          type="text"
+          value="Zyysurely/foundry-pr-studio"
+          placeholder="owner/repository"
+          spellcheck="false"
+          autocomplete="off"
+        >
+      </label>
+
+      <label>
+        <span class="field-label">Default branch</span>
+        <input
+          id="branch-input"
+          type="text"
+          value="main"
+          placeholder="main"
+          spellcheck="false"
+          autocomplete="off"
+        >
+      </label>
+
+      <div class="project-summary">
+        <span class="project-icon" aria-hidden="true">AI</span>
+        <div>
+          <small>Foundry project</small>
+          <strong id="project-summary-name">—</strong>
+        </div>
+      </div>
+
+      <div class="sidebar-note">
+        <strong>GitHub Pages limitation</strong>
+        <p>
+          A static page cannot securely create resources through an App token. These buttons open
+          GitHub’s authenticated web UI with generated content.
+        </p>
+      </div>
+    </aside>
+
+    <section class="tests-content">
+      <div class="tests-intro">
+        <p class="eyebrow">Two explicit actions</p>
+        <h2>Choose a creation test.</h2>
+        <p>Each click generates a different template. You make the final submission on GitHub.</p>
+      </div>
+
+      <div id="form-error" class="form-error" role="alert" hidden></div>
+
+      <div class="test-grid">
+        <article class="test-card">
+          <div class="test-icon test-icon-pr" aria-hidden="true">PR</div>
+          <p class="eyebrow">Pull request test</p>
+          <h3>Create a generated file</h3>
+          <p>
+            Copies random Markdown to your clipboard and opens GitHub’s new-file editor. Paste the
+            content, choose a new branch, and GitHub will guide you to open the pull request.
+          </p>
+          <button id="test-pr" class="button button-primary button-full" type="button">
+            Test PR creation
+            <span aria-hidden="true">↗</span>
+          </button>
+        </article>
+
+        <article class="test-card">
+          <div class="test-icon test-icon-issue" aria-hidden="true">#</div>
+          <p class="eyebrow">Issue test</p>
+          <h3>Open a prefilled issue</h3>
+          <p>
+            Opens GitHub’s new-issue form with a random title and body. Review the generated
+            content and click <strong>Submit new issue</strong> on GitHub.
+          </p>
+          <button id="test-issue" class="button button-primary button-full" type="button">
+            Test issue creation
+            <span aria-hidden="true">↗</span>
+          </button>
+        </article>
+      </div>
+
+      <section id="result-card" class="result-card" hidden>
+        <span class="result-check" aria-hidden="true">✓</span>
+        <div>
+          <p id="result-eyebrow" class="eyebrow">Template ready</p>
+          <h3 id="result-title"></h3>
+          <p id="result-description"></p>
+        </div>
+        <button id="copy-again" class="button button-secondary button-small" type="button" hidden>
+          Copy again
+        </button>
+      </section>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
